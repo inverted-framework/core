@@ -8,55 +8,54 @@ namespace Inverted\Core {
 		/**
 		 * @var InstantiatedObject[]
 		 */
-		private $cache;
+		private $_cache;
 
 		/**
 		 * @var integer[]
 		 */
-		private $to_resolve;
+		private $_stack;
 
 		public function __construct() {
 			parent::__construct();
 
-			$this->cache = [];
-			$this->to_resolve = [];
+			$this->_cache = [];
+			$this->_stack = [];
 		}
 
 		/**
 		 *
 		 */
 		public function getObjectsByClassName($class_name) {
-			$objects   = [];
-			$positions = $this->_indices(self::BY_CLASS_NAME, $class_name);
-			foreach ($positions as $position) {
-				if (isset($this->cache[$position]) && !empty($this->cache[$position])) {
-					$objects[] = $this->cache[$position];
-				} else {
-					$this->_resolve($position);
-				}
-			}
+			return $this->_get_objects($class_name, self::BY_CLASS_NAME);
 		}
 
+		//
 		/**
 		 *
 		 */
 		public function getObjectsByInterface($interface) {
-			$objects   = [];
-			$positions = $this->_indices(self::BY_CLASS_NAME, $class_name);
-			foreach ($positions as $position) {
-
-			}
+			return $this->_get_objects($class_name, self::BY_INTERFACE);
 		}
 
 		/**
 		 *
 		 */
 		public function getObjectsBySuperClass($superclass) {
-			$objects   = [];
-			$positions = $this->_indices(self::BY_CLASS_NAME, $class_name);
-			foreach ($positions as $position) {
+			return $this->_get_objects($class_name, self::BY_SUPERCLASS);
+		}
 
+		// 
+		private function _get_objects($thing, $index) {
+			$objects   = [];
+			$positions = $this->_indices($thing, $index);
+			foreach ($positions as $position) {
+				if (isset($this->_cache[$position]) && !empty($this->_cache[$position])) {
+					$objects[] = $this->_cache[$position];
+				} else {
+					$objects[] = $this->_resolve($position);
+				}
 			}
+			return $objects;
 		}
 
 		// 
@@ -67,10 +66,30 @@ namespace Inverted\Core {
 
 		//
 		private function _resolve($position) {
-			if (in_array($position, $this->to_resolve)) {
+			if (in_array($position, $this->_stack)) {
 				throw new CircularDependencyException();
 			}
-			$this->to_resolve[] = $position;
+			$this->_stack[] = $position;
+
+			$ssalc = $this->registry[$position];
+
+			// TODO: Check if class has configured parameters and use those instead.
+			$params = $this->_get_parameters($ssalc->getConstructor());
+			$args = [];
+			foreach ($params as $param) {
+				// TODO: Study signature and recurse as necessary.
+			}
+
+			array_pop($this->_stack);
+			$object = $ssalc->newInstanceArgs($args);
+			// TODO: Check if class is singleton, and optionally _cache.
+			$this->_cache[$position] = $object;
+			return $object;
+		}
+
+		// 
+		private function _get_parameters($method) {
+			return (!empty($method)) ? [] : $method->getParameters();
 		}
 	}
 }
