@@ -4,15 +4,29 @@ namespace Inverted\Core {
 	 *
 	 */
 	class Configuration {
+		const NAMESPACE     = 'namespace';
+		const REGISTRATIONS = 'classes';
+
+		/**
+		 * @var Configuration
+		 */
+		private static $_INSTANCE;
+
 		/**
 		 * @var string
 		 */
 		private $_namespace;
 
-		/**
-		 * @var Registration[]
-		 */
-		private $_registrations;
+		private function __construct() {
+			$this->_namespace = '';
+		}
+
+		public static function getInstance() {
+			if (empty(self::$_INSTANCE)) {
+				self::$_INSTANCE = new Configuration();
+			}
+			return self::$_INSTANCE;
+		}
 
 		/**
 		 *
@@ -26,20 +40,6 @@ namespace Inverted\Core {
 		 */
 		public function getNamespace() {
 			return $this->_namespace;
-		}
-
-		/**
-		 *
-		 */
-		public function setRegistrations($registrations) {
-			$this->_registrations = $registrations;
-		}
-
-		/**
-		 *
-		 */
-		public function getRegistrations() {
-			return $this->_registrations;
 		}
 	}
 }

@@ -2,7 +2,7 @@
 namespace Inverted\Core {
 
 	/**
-	 * TODO: Validate configuration.
+	 * 
 	 */
 	class Registration {
 		const CLASS_NAME  = 'class_name';
@@ -28,10 +28,10 @@ namespace Inverted\Core {
 		/**
 		 *
 		 */
-		public function __construct($information, $namespace='') {
+		public function __construct($information) {
 			$this->_data = array_merge($this->_defaults, $information);
-
-			// TODO: Combine namespace with classname to fully resolve the provided class.
+			$this->_normalize($namespace);
+			$this->_validate();
 		}
 
 		/**
@@ -67,6 +67,17 @@ namespace Inverted\Core {
 		 */
 		public function isSingleton() {
 			return $this->_data[self::SINGLETON];
+		}
+
+		private function _validate() {
+			
+		}
+
+		private function _normalize($namespace) {
+			// TODO: Combine namespace with classname to fully resolve the provided class.
+			if (!empty($namespace) && !StringUtil::startsWith($this->getClassName(), '\\')) {
+				$this->_data[self::CLASS_NAME] = $namespace . '\\' . $this->_data[self::CLASS_NAME];
+			}
 		}
 	}
 }
