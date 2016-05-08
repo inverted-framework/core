@@ -1,7 +1,7 @@
 <?php
-namespace Inverted\Core {
-	/**
-	 *
-	 */
-	class NonObjectException extends \Exception { }
-}
+namespace Inverted\Core;
+
+/**
+ *
+ */
+class NonObjectException extends \Exception { }

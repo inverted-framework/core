@@ -1,10 +1,10 @@
 <?php
-namespace Inverted\Core {
+namespace Inverted\Core;
 
-	/**
-	 *
-	 */
-	class ExecutionContext extends ObjectFactory {
-		
-	}
+/**
+ *
+ */
+class ExecutionContext extends ObjectFactory {
+	
 }
+

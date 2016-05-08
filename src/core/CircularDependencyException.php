@@ -1,7 +1,7 @@
 <?php
-namespace Inverted\Core {
-	/**
-	 *
-	 */
-	class CircularDependencyException extends \Exception { }
-}
+namespace Inverted\Core;
+
+/**
+ *
+ */
+class CircularDependencyException extends \Exception { }
