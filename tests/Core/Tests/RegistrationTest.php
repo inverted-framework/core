@@ -58,8 +58,20 @@ class RegistrationTest extends \PHPUnit_Framework_TestCase {
 	 * @test
 	 */
 	public function testValidity() {
-		$reg = new Registration('\\Alternate\\Namespace\\For\\ClassName', '\\Default\\Namespace');
-		$this->assertEquals('\\Alternate\\Namespace\\For\\ClassName', $reg->getClassName());
+		$reg = new Registration('', '');
+		$this->assertFalse($reg->isValid());
+
+		$reg = new Registration('Test', '\\AnyNameSpace\\');
+		$this->assertTrue($reg->isValid());
+
+		$reg = new Registration('', '\\AnyNameSpace\\');
+		$this->assertFalse($reg->isValid());
+
+		$reg = new Registration('Test', '\\AnyNameSpace\\');
+		$this->assertFalse($reg->isValid(true));
+
+		$reg = new Registration('Test', '\\AnyNameSpace\\');
+		$this->assertFalse($reg->isValid(true));
 	}
 }
 

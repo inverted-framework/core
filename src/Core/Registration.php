@@ -42,7 +42,7 @@ class Registration {
 	 *
 	 */
 	public function isValid($check_class_existence=false) {
-		return ($check_class_existence) ? class_exists($this->_class) : (!empty($this->_class));
+		return ($check_class_existence) ? class_exists($this->_class) : (!(empty($this->_class) || StringUtil::endsWith($this->_class, '\\')));
 	}
 
 	/**
@@ -78,15 +78,5 @@ class Registration {
 	 */
 	public function isSingleton() {
 		return $this->_data[self::SINGLETON];
-	}
-
-	private function _validate() {
-		if (! isset($this->_data[self::CLASS_NAME])) {
-			throw new InvalidRegistrationException();
-		}
-
-		if (! class_exists($this->_data[self::CLASS_NAME])) {
-			throw new ClassNotFoundException();
-		}
 	}
 }
