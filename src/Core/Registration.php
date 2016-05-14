@@ -5,7 +5,6 @@ namespace Inverted\Core;
  * 
  */
 class Registration {
-	const CLASS_NAME  = 'class_name';
 	const IDENTIFIER  = 'name';
 	const CONSTRUCTOR = 'constructor';
 	const PARAMETERS  = 'parameters';
@@ -15,10 +14,16 @@ class Registration {
 	 * @var array
 	 */
 	private $_defaults = [
+		self::IDENTIFIER  => null,
 		self::CONSTRUCTOR => null,
 		self::PARAMETERS  => [],
-		self::SINGLETON   => true
+		self::SINGLETON   => true,
 	];
+
+	/**
+	 * @var string
+	 */
+	private $_class;
 
 	/**
 	 * @var array
@@ -28,17 +33,23 @@ class Registration {
 	/**
 	 *
 	 */
-	public function __construct($information) {
-		$this->_data = array_merge($this->_defaults, $information);
-		$this->_normalize($namespace);
-		$this->_validate();
+	public function __construct($class, $namespace='', $information=[]) {
+		$this->_class = (!empty($namespace) && !StringUtil::startsWith($class, '\\')) ? $namespace . '\\' . $class : $class;
+		$this->_data  = array_merge($this->_defaults, $information);
+	}
+
+	/**
+	 *
+	 */
+	public function isValid($check_class_existence=false) {
+		return ($check_class_existence) ? class_exists($this->_class) : (!empty($this->_class));
 	}
 
 	/**
 	 *
 	 */
 	public function getClassName() {
-		return $this->_data[self::CLASS_NAME];
+		return $this->_class;
 	}
 
 	/**
@@ -70,13 +81,12 @@ class Registration {
 	}
 
 	private function _validate() {
-		
-	}
+		if (! isset($this->_data[self::CLASS_NAME])) {
+			throw new InvalidRegistrationException();
+		}
 
-	private function _normalize($namespace) {
-		// TODO: Combine namespace with classname to fully resolve the provided class.
-		if (!empty($namespace) && !StringUtil::startsWith($this->getClassName(), '\\')) {
-			$this->_data[self::CLASS_NAME] = $namespace . '\\' . $this->_data[self::CLASS_NAME];
+		if (! class_exists($this->_data[self::CLASS_NAME])) {
+			throw new ClassNotFoundException();
 		}
 	}
 }
