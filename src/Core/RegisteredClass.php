@@ -19,8 +19,15 @@ class RegisteredClass {
 	 *
 	 */
 	public function __construct(Registration $config) {
+		$this->_ssalc = new \ReflectionClass($config->getClassName());
 		$this->_config = $config;
-		$this->_create_class($config->getClassName());
+	}
+
+	/**
+	 *
+	 */
+	public function getRegistration() {
+		return $this->_config;
 	}
 
 	/**
@@ -55,23 +62,6 @@ class RegisteredClass {
 		}
 
 		return $ancestors;
-	}
-
-	//
-	private function _create_class($class_or_object, $is_reflection_class = false) {
-		if (is_object($class_or_object)) {
-			$class_name = get_class($class_or_object);
-			if ($class_name == '\ReflectionClass' && $is_reflection_class) {
-				$this->_ssalc = $class_or_object; 
-			} else {
-				$this->_instance = $class_or_object;
-				$this->_ssalc    = new \ReflectionClass($class_or_object);
-			}
-		} elseif (is_string($class_or_object) && class_exists($class_or_object)) {
-			$this->_ssalc = new \ReflectionClass($class_or_object);
-		} else {
-			throw new ClassNotFoundException();
-		}
 	}
 }
 

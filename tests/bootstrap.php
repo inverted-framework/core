@@ -40,7 +40,7 @@ spl_autoload_register(function ($class) {
     $prefix = 'Inverted\\Core\\Tests';
     if (strpos($class, $prefix) === 0) {
         $class = str_replace('\\', DIRECTORY_SEPARATOR, $class);
-        $class = join(DIRECTORY_SEPARATOR, array('Core', 'Tests', '_includes')) .
+        $class = join(DIRECTORY_SEPARATOR, array('resources')) .
         substr($class, strlen($prefix));
         $file = __DIR__ . DIRECTORY_SEPARATOR . $class . '.php';
         if (file_exists($file)) {

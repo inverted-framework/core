@@ -41,8 +41,8 @@ class Registration {
 	/**
 	 *
 	 */
-	public function isValid($check_class_existence=false) {
-		return ($check_class_existence) ? class_exists($this->_class) : (!(empty($this->_class) || StringUtil::endsWith($this->_class, '\\')));
+	public function isValid() {
+		return (!(empty($this->_class) || StringUtil::endsWith($this->_class, '\\')));
 	}
 
 	/**

@@ -26,4 +26,12 @@ class InstantiatedObject {
 	public function getInstance() {
 		return $this->_instance;
 	}
+
+	/**
+	 *
+	 */
+	public function getRegisteredClass() {
+		$ssalc = new \ReflectionClass($this->_instance);
+		return new RegisteredClass(new Registration($ssalc->getName()));
+	}
 }

@@ -66,12 +66,6 @@ class RegistrationTest extends \PHPUnit_Framework_TestCase {
 
 		$reg = new Registration('', '\\AnyNameSpace\\');
 		$this->assertFalse($reg->isValid());
-
-		$reg = new Registration('Test', '\\AnyNameSpace\\');
-		$this->assertFalse($reg->isValid(true));
-
-		$reg = new Registration('Test', '\\AnyNameSpace\\');
-		$this->assertFalse($reg->isValid(true));
 	}
 }
 
