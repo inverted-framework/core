@@ -23,11 +23,20 @@ class RegisteredClass {
 		$this->_config = $config;
 	}
 
+	public function Instantiate($arguments) {
+		$raw = $this->_ssalc->newInstanceArgs($arguments);
+		return new InstantiatedObject($raw);
+	}
+
+	public function getConstructor() {
+		return (! empty($this->_config->getConstructor())) ? $this->_ssalc->getMethod($this->_config->getConstructor()) : $this->_ssalc->getConstructor();
+	}
+
 	/**
 	 *
 	 */
-	public function getRegistration() {
-		return $this->_config;
+	public function getIdentifier() {
+		return $this->_config->getIdentifier();
 	}
 
 	/**
@@ -50,6 +59,14 @@ class RegisteredClass {
 	public function getSuperClasses() {
 		return $this->_get_super_classes($this->_ssalc);
 	}
+
+	/**
+	 *
+	 */
+	public function isSingleton() {
+		return $this->_config->isSingleton();
+	}
+
 
 	// 
 	private function _get_super_classes($obj) {

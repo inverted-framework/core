@@ -49,11 +49,7 @@ class ObjectFactory extends ClassRegistry {
 		$objects   = [];
 		$positions = $this->_indices($thing, $index);
 		foreach ($positions as $position) {
-			if (isset($this->_cache[$position]) && !empty($this->_cache[$position])) {
-				$objects[] = $this->_cache[$position];
-			} else {
-				$objects[] = $this->_resolve($position);
-			}
+			$objects[] = $this->_resolve($position)->getInstance();
 		}
 		return $objects;
 	}
@@ -71,24 +67,29 @@ class ObjectFactory extends ClassRegistry {
 		}
 		$this->_stack[] = $position;
 
-		$ssalc = $this->registry[$position];
+		if (!isset($this->_cache[$position]) || empty($this->_cache[$position])) {
+			$ssalc = $this->registry[$position];
 
-		// TODO: Check if class has configured parameters and use those instead.
-		$params = $this->_get_parameters($ssalc->getConstructor());
-		$args = [];
-		foreach ($params as $param) {
-			// TODO: Study signature and recurse as necessary.
+			// TODO: Check if class has configured parameters and use those instead.
+			$params = $this->_get_parameters($ssalc->getConstructor());
+			$args = [];
+			foreach ($params as $param) {
+				// TODO: Study signature and recurse as necessary.
+			}
+
+			array_pop($this->_stack);
+			$object = $ssalc->Instantiate($args);
+			if ($ssalc->isSingleton()) {
+				$this->_cache[$position] = $object;
+			}
+		} else {
+			$object = $this->_cache[$position];
 		}
-
-		array_pop($this->_stack);
-		$object = $ssalc->newInstanceArgs($args);
-		// TODO: Check if class is singleton, and optionally _cache.
-		$this->_cache[$position] = $object;
 		return $object;
 	}
 
 	// 
 	private function _get_parameters($method) {
-		return (!empty($method)) ? [] : $method->getParameters();
+		return (!empty($method)) ? $method->getParameters() : [];
 	}
 }
