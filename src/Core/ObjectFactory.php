@@ -34,14 +34,14 @@ class ObjectFactory extends ClassRegistry {
 	 *
 	 */
 	public function getObjectsByInterface($interface) {
-		return $this->_get_objects($class_name, self::BY_INTERFACE);
+		return $this->_get_objects($interface, self::BY_INTERFACE);
 	}
 
 	/**
 	 *
 	 */
 	public function getObjectsBySuperClass($superclass) {
-		return $this->_get_objects($class_name, self::BY_SUPERCLASS);
+		return $this->_get_objects($superclass, self::BY_SUPERCLASS);
 	}
 
 	// 
