@@ -29,8 +29,9 @@ class RegisteredClass {
 	}
 
 	public function getConstructor() {
-		if (! empty($this->_config->getConstructor())) {
-			$method = $this->_ssalc->getMethod($this->_config->getConstructor());
+		$method_name = $this->_config->getConstructor();
+		if (! empty($method_name)) {
+			$method = $this->_ssalc->getMethod($method_name);
 		} else {
 			$method = $this->_ssalc->getConstructor(); 
 		}
