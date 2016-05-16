@@ -50,7 +50,7 @@ class ClassRegistry {
 		$this->_index(self::BY_INTERFACE,  $class->getInterfaces());
 		$this->_index(self::BY_SUPERCLASS, $class->getSuperClasses());
 
-		$id = $class->getRegistration()->getIdentifier();
+		$id = $class->getIdentifier();
 		if (!empty($id)) {
 			$this->_index(self::BY_IDENTIFIER, [$id]);
 		}
