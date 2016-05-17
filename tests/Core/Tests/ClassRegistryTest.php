@@ -10,19 +10,42 @@ use \Inverted\Core\Registration;
  */
 class ClassRegistryTest extends \PHPUnit_Framework_TestCase {
 	/**
+	 * 
+	 */
+	private $_registry;
+
+	/**
+	 * 
+	 */
+	private $_ssalc;
+
+	public function setUp() {
+		$reg = new Registration('SecondClass', '\\Inverted\\Core\\Tests\\Projects\\Simple', [Registration::IDENTIFIER => 'second']);
+		
+		$this->_ssalc    = new RegisteredClass($reg);
+		$this->_registry = new ClassRegistry();
+
+		$this->_registry->addClassToRegistry($this->_ssalc);
+	}
+
+	/**
 	 * @test
 	 */
 	public function testIndexAndRetrieve() {
-		$reg      = new Registration('SecondClass', '\\Inverted\\Core\\Tests\\Projects\\Simple', [Registration::IDENTIFIER => 'second']);
-		$ssalc    = new RegisteredClass($reg);
-		$registry = new ClassRegistry();
+		$this->assertEquals([$this->_ssalc], $this->_registry->getClassesByClassName('Inverted\\Core\\Tests\\Projects\\Simple\\SecondClass'));
+		$this->assertEquals([$this->_ssalc], $this->_registry->getClassesByInterface('Inverted\\Core\\Tests\\Projects\\Simple\\MyInterface'));
+		$this->assertEquals([$this->_ssalc], $this->_registry->getClassesBySuperClass('Inverted\\Core\\Tests\\Projects\\Simple\\FirstClass'));
+		$this->assertEquals([$this->_ssalc], $this->_registry->getClassesByIdentifier('second'));
+	}
 
-		$registry->addClassToRegistry($ssalc);
-
-		$this->assertEquals([$ssalc], $registry->getClassesByClassName('Inverted\\Core\\Tests\\Projects\\Simple\\SecondClass'));
-		$this->assertEquals([$ssalc], $registry->getClassesByInterface('Inverted\\Core\\Tests\\Projects\\Simple\\MyInterface'));
-		$this->assertEquals([$ssalc], $registry->getClassesBySuperClass('Inverted\\Core\\Tests\\Projects\\Simple\\FirstClass'));
-		$this->assertEquals([$ssalc], $registry->getClassesByIdentifier('second'));
+	/**
+	 * @test
+	 */
+	public function testAccessingWithLeadingSlash() {
+		$this->assertEquals([$this->_ssalc], $this->_registry->getClassesByClassName('\\Inverted\\Core\\Tests\\Projects\\Simple\\SecondClass'));
+		$this->assertEquals([$this->_ssalc], $this->_registry->getClassesByInterface('\\Inverted\\Core\\Tests\\Projects\\Simple\\MyInterface'));
+		$this->assertEquals([$this->_ssalc], $this->_registry->getClassesBySuperClass('\\Inverted\\Core\\Tests\\Projects\\Simple\\FirstClass'));
+		$this->assertEquals([$this->_ssalc], $this->_registry->getClassesByIdentifier('second'));
 	}
 }
 

@@ -44,6 +44,13 @@ class ObjectFactory extends ClassRegistry {
 		return $this->_get_objects($superclass, self::BY_SUPERCLASS);
 	}
 
+	/**
+	 *
+	 */
+	public function getObjectsByIdentifier($identifier) {
+		return $this->_get_objects($identifier, self::BY_IDENTIFIER);
+	}
+
 	// 
 	private function _get_objects($thing, $index) {
 		$objects   = [];
@@ -56,6 +63,7 @@ class ObjectFactory extends ClassRegistry {
 
 	// 
 	private function _indices($thing, $index) {
+		$thing   = ltrim($thing, '\\');
 		$indices = $this->indices[$index][$thing];
 		return (empty($indices)) ? [] : $indices;
 	}
@@ -77,7 +85,6 @@ class ObjectFactory extends ClassRegistry {
 				// TODO: Study signature and recurse as necessary.
 			}
 
-			array_pop($this->_stack);
 			$object = $ssalc->Instantiate($args);
 			if ($ssalc->isSingleton()) {
 				$this->_cache[$position] = $object;
@@ -85,6 +92,8 @@ class ObjectFactory extends ClassRegistry {
 		} else {
 			$object = $this->_cache[$position];
 		}
+
+		array_pop($this->_stack);
 		return $object;
 	}
 

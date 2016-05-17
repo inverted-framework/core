@@ -99,6 +99,7 @@ class ClassRegistry {
 
 	//
 	private function _retrieve($thing, $index) {
+		$thing    = ltrim($thing, '\\');
 		$registry = &$this->registry;
 
 		$fn = function ($position) use ($registry) {
