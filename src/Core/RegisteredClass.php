@@ -24,7 +24,13 @@ class RegisteredClass {
 	}
 
 	public function Instantiate($arguments) {
-		$raw = $this->_ssalc->newInstanceArgs($arguments);
+		if ($this->_config->getConstructor() === null) {
+			$raw = $this->_ssalc->newInstanceArgs($arguments);
+		} else {
+			$method = $this->_ssalc->getMethod($this->_config->getConstructor());
+			$raw    = $method->invokeArgs(null, $arguments);
+		}
+		
 		return new InstantiatedObject($raw);
 	}
 

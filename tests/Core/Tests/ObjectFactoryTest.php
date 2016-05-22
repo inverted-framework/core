@@ -91,7 +91,7 @@ class ObjectFactoryTest extends \PHPUnit_Framework_TestCase {
 	 * @test
 	 */
 	public function testNonSingleton() {
-		$reg   = new Registration('ThirdClass', '\\Inverted\\Core\\Tests\\Projects\\Simple', [Registration::SINGLETON => false]);
+		$reg   = new Registration('ThirdClass', self::SIMPLE_PKG, [Registration::SINGLETON => false]);
 		$ssalc = new RegisteredClass($reg);
 
 		$this->_factory->addClassToRegistry($ssalc);
@@ -102,6 +102,21 @@ class ObjectFactoryTest extends \PHPUnit_Framework_TestCase {
 		$obj1[0]->x = 1;
 
 		$this->assertNotEquals(1, $obj2[0]->x, 'The whole purpose of the system is broken.');
+	}
+
+	/**
+	 * @test
+	 */
+	public function testStaticConstructor() {
+		$reg   = new Registration('HasStaticConstructor', self::SIMPLE_PKG, [Registration::CONSTRUCTOR => 'getInstance']);
+		$ssalc = new RegisteredClass($reg);
+
+		$this->_factory->addClassToRegistry($ssalc);
+
+		$obj = $this->_factory->getObjectsByClassName(self::SIMPLE_PKG.'\\HasStaticConstructor');
+
+		$this->assertCount(1, $obj);
+		$this->assertInstanceOf(self::SIMPLE_PKG.'\\HasStaticConstructor', $obj[0]);
 	}
 
 	/**
@@ -154,6 +169,49 @@ class ObjectFactoryTest extends \PHPUnit_Framework_TestCase {
 		}
 
 		$objs = $this->_factory->getObjectsByClassName(self::PROBLEM_PKG.'\\A');
+	}
+
+	/**
+	 * @test
+	 * @expectedException \Inverted\Core\TooManyClassesException
+	 */
+	public function testTooManyClassesMatch() {
+		$classes = ['FirstImplementation', 'SecondImplementation', 'RequiresRootInterface'];
+		foreach ($classes as $class) {
+			$reg   = new Registration($class, self::PROBLEM_PKG);
+			$ssalc = new RegisteredClass($reg);
+
+			$this->_factory->addClassToRegistry($ssalc);
+		}
+
+		$objs = $this->_factory->getObjectsByClassName(self::PROBLEM_PKG.'\\RequiresRootInterface');
+
+	}
+
+	/**
+	 * @test
+	 * @expectedException \Inverted\Core\ClassNotFoundException
+	 */
+	public function testNoClassesMatch() {
+		$reg   = new Registration('RequiresRootInterface', self::PROBLEM_PKG);
+		$ssalc = new RegisteredClass($reg);
+
+		$this->_factory->addClassToRegistry($ssalc);
+
+		$objs = $this->_factory->getObjectsByClassName(self::PROBLEM_PKG.'\\RequiresRootInterface');
+	}
+
+	/**
+	 * @test
+	 * @expectedException \Inverted\Core\NoTypeDeclarationException
+	 */
+	public function testBareParameter() {
+		$reg   = new Registration('HasNoStronglyTypedParameter', self::PROBLEM_PKG);
+		$ssalc = new RegisteredClass($reg);
+
+		$this->_factory->addClassToRegistry($ssalc);
+
+		$objs = $this->_factory->getObjectsByClassName(self::PROBLEM_PKG.'\\HasNoStronglyTypedParameter');
 	}
 
 	private function _setupSecondClass() {
