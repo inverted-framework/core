@@ -9,11 +9,8 @@ use \Inverted\Core\Registration;
  * 
  */
 class ObjectFactoryTest extends \PHPUnit_Framework_TestCase {
-	const FIRST_CLASS  = '\\Inverted\\Core\\Tests\\Projects\\Simple\\FirstClass';
-	const SECOND_CLASS = '\\Inverted\\Core\\Tests\\Projects\\Simple\\SecondClass';
-	const THIRD_CLASS  = '\\Inverted\\Core\\Tests\\Projects\\Simple\\ThirdClass';
-	const MY_INTERFACE = '\\Inverted\\Core\\Tests\\Projects\\Simple\\MyInterface';
-	const IDENTIFIER   = 'second';
+	const SIMPLE_PKG  = '\\Inverted\\Core\\Tests\\Projects\\Simple';
+	const PROBLEM_PKG = '\\Inverted\\Core\\Tests\\Projects\\Problems';
 
 	/**
 	 * @var ObjectFactory
@@ -24,60 +21,66 @@ class ObjectFactoryTest extends \PHPUnit_Framework_TestCase {
 	 *
 	 */
 	public function setUp() {
-		$reg   = new Registration('SecondClass', '\\Inverted\\Core\\Tests\\Projects\\Simple', [Registration::IDENTIFIER => self::IDENTIFIER]);
-		$ssalc = new RegisteredClass($reg);
-
 		$this->_factory = new ObjectFactory();
 
-		$this->_factory->addClassToRegistry($ssalc);
 	}
 
 	/**
 	 * @test
 	 */
 	public function testGetObjectsByClassName() {
-		$obj = $this->_factory->getObjectsByClassName(ltrim(self::SECOND_CLASS, '\\'));
+		$this->_setupSecondClass();
+
+		$obj = $this->_factory->getObjectsByClassName(ltrim(self::SIMPLE_PKG.'\\SecondClass', '\\'));
 
 		$this->assertCount(1, $obj);
-		$this->assertInstanceOf(self::SECOND_CLASS, $obj[0]);		
+		$this->assertInstanceOf(self::SIMPLE_PKG.'\\SecondClass', $obj[0]);		
 	}
 
 	/**
 	 * @test
 	 */
 	public function testGetObjectsByInterface() {
-		$obj = $this->_factory->getObjectsByInterface(ltrim(self::MY_INTERFACE, '\\'));
+		$this->_setupSecondClass();
+
+		$obj = $this->_factory->getObjectsByInterface(ltrim(self::SIMPLE_PKG.'\\MyInterface', '\\'));
 
 		$this->assertCount(1, $obj);
-		$this->assertInstanceOf(self::SECOND_CLASS, $obj[0]);
+		$this->assertInstanceOf(self::SIMPLE_PKG.'\\SecondClass', $obj[0]);
 	}
 
 	/**
 	 * @test
 	 */
 	public function testGetObjectsBySuperClass() {
-		$obj = $this->_factory->getObjectsBySuperClass(ltrim(self::FIRST_CLASS, '\\'));
+		$this->_setupSecondClass();
+
+		$obj = $this->_factory->getObjectsBySuperClass(ltrim(self::SIMPLE_PKG.'\\FirstClass', '\\'));
 
 		$this->assertCount(1, $obj);
-		$this->assertInstanceOf(self::SECOND_CLASS, $obj[0]);
+		$this->assertInstanceOf(self::SIMPLE_PKG.'\\SecondClass', $obj[0]);
 	}
 
 	/**
 	 * @test
 	 */
 	public function testGetObjectsByIdentifier() {
-		$obj = $this->_factory->getObjectsByIdentifier(self::IDENTIFIER);
+		$this->_setupSecondClass();
+
+		$obj = $this->_factory->getObjectsByIdentifier('second');
 
 		$this->assertCount(1, $obj);
-		$this->assertInstanceOf(self::SECOND_CLASS, $obj[0]);
+		$this->assertInstanceOf(self::SIMPLE_PKG.'\\SecondClass', $obj[0]);
 	}
 
 	/**
 	 * @test
 	 */
 	public function testSingleton() {
-		$obj1 = $this->_factory->getObjectsBySuperClass(ltrim(self::FIRST_CLASS, '\\'));
-		$obj2 = $this->_factory->getObjectsByInterface(ltrim(self::MY_INTERFACE, '\\'));
+		$this->_setupSecondClass();
+
+		$obj1 = $this->_factory->getObjectsBySuperClass(ltrim(self::SIMPLE_PKG.'\\FirstClass', '\\'));
+		$obj2 = $this->_factory->getObjectsByInterface(ltrim(self::SIMPLE_PKG.'\\MyInterface', '\\'));
 
 		$obj1[0]->x = 1;
 
@@ -93,8 +96,8 @@ class ObjectFactoryTest extends \PHPUnit_Framework_TestCase {
 
 		$this->_factory->addClassToRegistry($ssalc);
 
-		$obj1 = $this->_factory->getObjectsByClassName(ltrim(self::THIRD_CLASS, '\\'));
-		$obj2 = $this->_factory->getObjectsByClassName(ltrim(self::THIRD_CLASS, '\\'));
+		$obj1 = $this->_factory->getObjectsByClassName(ltrim(self::SIMPLE_PKG.'\\ThirdClass', '\\'));
+		$obj2 = $this->_factory->getObjectsByClassName(ltrim(self::SIMPLE_PKG.'\\ThirdClass', '\\'));
 
 		$obj1[0]->x = 1;
 
@@ -105,16 +108,59 @@ class ObjectFactoryTest extends \PHPUnit_Framework_TestCase {
 	 * @test
 	 */
 	public function testInstantiationWithLeadingSlash() {
+		$this->_setupSecondClass();
+
 		$objs   = [];
-		$objs[] = $this->_factory->getObjectsByClassName(self::SECOND_CLASS);
-		$objs[] = $this->_factory->getObjectsByInterface(self::MY_INTERFACE);
-		$objs[] = $this->_factory->getObjectsBySuperClass(self::FIRST_CLASS);
-		$objs[] = $this->_factory->getObjectsByIdentifier(self::IDENTIFIER);
+		$objs[] = $this->_factory->getObjectsByClassName(self::SIMPLE_PKG.'\\SecondClass');
+		$objs[] = $this->_factory->getObjectsByInterface(self::SIMPLE_PKG.'\\MyInterface');
+		$objs[] = $this->_factory->getObjectsBySuperClass(self::SIMPLE_PKG.'\\FirstClass');
+		$objs[] = $this->_factory->getObjectsByIdentifier('second');
 
 		foreach ($objs as $obj) {
 			$this->assertCount(1, $obj);
-			$this->assertInstanceOf(self::SECOND_CLASS, $obj[0]);
+			$this->assertInstanceOf(self::SIMPLE_PKG.'\\SecondClass', $obj[0]);
 		}
+	}
+
+	/**
+	 * @test
+	 */
+	public function testClassInstantiationWithParameters() {
+		$this->_setupSecondClass();
+
+		$reg   = new Registration('HasParameters', self::SIMPLE_PKG);
+		$ssalc = new RegisteredClass($reg);
+
+		$this->_factory->addClassToRegistry($ssalc);
+
+		$objs = $this->_factory->getObjectsByClassName(self::SIMPLE_PKG.'\\HasParameters');
+
+		$this->assertCount(1, $objs);
+		$this->assertInstanceOf(self::SIMPLE_PKG.'\\HasParameters', $objs[0]);
+
+	}
+
+	/**
+	 * @test
+	 * @expectedException \Inverted\Core\CircularDependencyException
+	 */
+	public function testCircularDependency() {
+		$classes = ['A', 'B', 'C'];
+		foreach ($classes as $class) {
+			$reg   = new Registration($class, self::PROBLEM_PKG);
+			$ssalc = new RegisteredClass($reg);
+
+			$this->_factory->addClassToRegistry($ssalc);
+		}
+
+		$objs = $this->_factory->getObjectsByClassName(self::PROBLEM_PKG.'\\A');
+	}
+
+	private function _setupSecondClass() {
+		$reg   = new Registration('SecondClass', self::SIMPLE_PKG, [Registration::IDENTIFIER => 'second']);
+		$ssalc = new RegisteredClass($reg);
+
+		$this->_factory->addClassToRegistry($ssalc);
 	}
 }
 

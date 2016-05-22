@@ -51,7 +51,9 @@ class ObjectFactory extends ClassRegistry {
 		return $this->_get_objects($identifier, self::BY_IDENTIFIER);
 	}
 
-	// 
+	// This class returns an array of objects (or empty array) of things specified.
+	// $index is which index to search through (enumerated by the constants in ClassRegistry)
+	// $thing is the class/interface/identifier to search for.
 	private function _get_objects($thing, $index) {
 		$objects   = [];
 		$positions = $this->_indices($thing, $index);
@@ -61,11 +63,28 @@ class ObjectFactory extends ClassRegistry {
 		return $objects;
 	}
 
-	// 
+	// Returns an array (if empty) of matching positions in an index.
 	private function _indices($thing, $index) {
 		$thing   = ltrim($thing, '\\');
-		$indices = $this->indices[$index][$thing];
-		return (empty($indices)) ? [] : $indices;
+		return (isset($this->indices[$index][$thing])) ? $this->indices[$index][$thing] : [];
+	}
+
+	private function _search($type, $identifier) {
+		$identifiers = $this->_indices($identifier, self::BY_IDENTIFIER);
+		$indexes     = [self::BY_CLASS_NAME, self::BY_INTERFACE, self::BY_SUPERCLASS];
+
+		foreach ($indexes as $index) {
+			$types = $this->_indices($type, $index);
+			if (count($types) > 0) {
+				break;
+			}
+		}
+		
+		if (!empty($identifiers)) {
+			return array_intersect($identifiers, $types);
+		} else {
+			return $types;
+		}
 	}
 
 	//
@@ -82,7 +101,21 @@ class ObjectFactory extends ClassRegistry {
 			$params = $this->_get_parameters($ssalc->getConstructor());
 			$args = [];
 			foreach ($params as $param) {
-				// TODO: Study signature and recurse as necessary.
+				if ($param->getClass()) {
+					$results = $this->_search($param->getClass()->getName(), $param->getName());
+
+					if (count($results) == 1) {
+						$args[] = $this->_resolve($results[0])->getInstance();
+					} else {
+						if (count($results) == 0) {
+							throw new ClassNotFoundException();
+						} else {
+							throw new TooManyClassesException();
+						}
+					}
+				} else {
+					throw new NoTypeDeclarationException();
+				}
 			}
 
 			$object = $ssalc->Instantiate($args);
