@@ -29,7 +29,7 @@ class ObjectFactoryTest extends \PHPUnit_Framework_TestCase {
 	 * @test
 	 */
 	public function testGetObjectsByClassName() {
-		$this->_setupSecondClass();
+		$this->_setupClass('SecondClass', self::SIMPLE_PKG, [Registration::IDENTIFIER => 'second']);
 
 		$obj = $this->_factory->getObjectsByClassName(ltrim(self::SIMPLE_PKG.'\\SecondClass', '\\'));
 
@@ -41,7 +41,7 @@ class ObjectFactoryTest extends \PHPUnit_Framework_TestCase {
 	 * @test
 	 */
 	public function testGetObjectsByInterface() {
-		$this->_setupSecondClass();
+		$this->_setupClass('SecondClass', self::SIMPLE_PKG, [Registration::IDENTIFIER => 'second']);
 
 		$obj = $this->_factory->getObjectsByInterface(ltrim(self::SIMPLE_PKG.'\\MyInterface', '\\'));
 
@@ -53,7 +53,7 @@ class ObjectFactoryTest extends \PHPUnit_Framework_TestCase {
 	 * @test
 	 */
 	public function testGetObjectsBySuperClass() {
-		$this->_setupSecondClass();
+		$this->_setupClass('SecondClass', self::SIMPLE_PKG, [Registration::IDENTIFIER => 'second']);
 
 		$obj = $this->_factory->getObjectsBySuperClass(ltrim(self::SIMPLE_PKG.'\\FirstClass', '\\'));
 
@@ -65,7 +65,7 @@ class ObjectFactoryTest extends \PHPUnit_Framework_TestCase {
 	 * @test
 	 */
 	public function testGetObjectsByIdentifier() {
-		$this->_setupSecondClass();
+		$this->_setupClass('SecondClass', self::SIMPLE_PKG, [Registration::IDENTIFIER => 'second']);
 
 		$obj = $this->_factory->getObjectsByIdentifier('second');
 
@@ -77,7 +77,7 @@ class ObjectFactoryTest extends \PHPUnit_Framework_TestCase {
 	 * @test
 	 */
 	public function testSingleton() {
-		$this->_setupSecondClass();
+		$this->_setupClass('SecondClass', self::SIMPLE_PKG, [Registration::IDENTIFIER => 'second']);
 
 		$obj1 = $this->_factory->getObjectsBySuperClass(ltrim(self::SIMPLE_PKG.'\\FirstClass', '\\'));
 		$obj2 = $this->_factory->getObjectsByInterface(ltrim(self::SIMPLE_PKG.'\\MyInterface', '\\'));
@@ -91,10 +91,7 @@ class ObjectFactoryTest extends \PHPUnit_Framework_TestCase {
 	 * @test
 	 */
 	public function testNonSingleton() {
-		$reg   = new Registration('ThirdClass', self::SIMPLE_PKG, [Registration::SINGLETON => false]);
-		$ssalc = new RegisteredClass($reg);
-
-		$this->_factory->addClassToRegistry($ssalc);
+		$this->_setupClass('ThirdClass', self::SIMPLE_PKG, [Registration::SINGLETON => false]);
 
 		$obj1 = $this->_factory->getObjectsByClassName(ltrim(self::SIMPLE_PKG.'\\ThirdClass', '\\'));
 		$obj2 = $this->_factory->getObjectsByClassName(ltrim(self::SIMPLE_PKG.'\\ThirdClass', '\\'));
@@ -108,10 +105,7 @@ class ObjectFactoryTest extends \PHPUnit_Framework_TestCase {
 	 * @test
 	 */
 	public function testStaticConstructor() {
-		$reg   = new Registration('HasStaticConstructor', self::SIMPLE_PKG, [Registration::CONSTRUCTOR => 'getInstance']);
-		$ssalc = new RegisteredClass($reg);
-
-		$this->_factory->addClassToRegistry($ssalc);
+		$this->_setupClass('HasStaticConstructor', self::SIMPLE_PKG, [Registration::CONSTRUCTOR => 'getInstance']);
 
 		$obj = $this->_factory->getObjectsByClassName(self::SIMPLE_PKG.'\\HasStaticConstructor');
 
@@ -123,7 +117,7 @@ class ObjectFactoryTest extends \PHPUnit_Framework_TestCase {
 	 * @test
 	 */
 	public function testInstantiationWithLeadingSlash() {
-		$this->_setupSecondClass();
+		$this->_setupClass('SecondClass', self::SIMPLE_PKG, [Registration::IDENTIFIER => 'second']);
 
 		$objs   = [];
 		$objs[] = $this->_factory->getObjectsByClassName(self::SIMPLE_PKG.'\\SecondClass');
@@ -141,18 +135,30 @@ class ObjectFactoryTest extends \PHPUnit_Framework_TestCase {
 	 * @test
 	 */
 	public function testClassInstantiationWithParameters() {
-		$this->_setupSecondClass();
-
-		$reg   = new Registration('HasParameters', self::SIMPLE_PKG);
-		$ssalc = new RegisteredClass($reg);
-
-		$this->_factory->addClassToRegistry($ssalc);
+		$this->_setupClass('SecondClass', self::SIMPLE_PKG, [Registration::IDENTIFIER => 'second']);
+		$this->_setupClass('HasParameters', self::SIMPLE_PKG);
 
 		$objs = $this->_factory->getObjectsByClassName(self::SIMPLE_PKG.'\\HasParameters');
 
 		$this->assertCount(1, $objs);
 		$this->assertInstanceOf(self::SIMPLE_PKG.'\\HasParameters', $objs[0]);
+	}
 
+	/**
+	 * @test
+	 */
+	public function testClassInstantiationWithConfiguredParameters() {
+		$this->_setupClass('SecondClass', self::SIMPLE_PKG, [Registration::IDENTIFIER => 'this']);
+		$this->_setupClass('ThirdClass', self::SIMPLE_PKG, [Registration::IDENTIFIER => 'that']);
+		$this->_setupClass('HasMultipleParameters', self::SIMPLE_PKG, [Registration::PARAMETERS => ['&this', '&that', 'string', 1, ['x', 'y', 'z']]]);
+
+		$objs = $this->_factory->getObjectsByClassName(self::SIMPLE_PKG.'\\HasMultipleParameters');
+
+		$this->assertCount(1, $objs);
+		$this->assertInstanceOf(self::SIMPLE_PKG.'\\HasMultipleParameters', $objs[0]);
+		$this->assertEquals('string', $objs[0]->string);
+		$this->assertEquals(1, $objs[0]->integer);
+		$this->assertEquals(['x', 'y', 'z'], $objs[0]->array);
 	}
 
 	/**
@@ -162,13 +168,18 @@ class ObjectFactoryTest extends \PHPUnit_Framework_TestCase {
 	public function testCircularDependency() {
 		$classes = ['A', 'B', 'C'];
 		foreach ($classes as $class) {
-			$reg   = new Registration($class, self::PROBLEM_PKG);
-			$ssalc = new RegisteredClass($reg);
-
-			$this->_factory->addClassToRegistry($ssalc);
+			$this->_setupClass($class, self::PROBLEM_PKG);
 		}
 
 		$objs = $this->_factory->getObjectsByClassName(self::PROBLEM_PKG.'\\A');
+	}
+
+	/**
+	 * @test
+	 */
+	public function testConfiguredParameters() {
+		$this->_setupClass('SecondClass', self::SIMPLE_PKG, [Registration::IDENTIFIER => 'second']);
+		$this->_setupClass('ThirdClass', self::SIMPLE_PKG, [Registration::SINGLETON => false]);
 	}
 
 	/**
@@ -178,14 +189,10 @@ class ObjectFactoryTest extends \PHPUnit_Framework_TestCase {
 	public function testTooManyClassesMatch() {
 		$classes = ['FirstImplementation', 'SecondImplementation', 'RequiresRootInterface'];
 		foreach ($classes as $class) {
-			$reg   = new Registration($class, self::PROBLEM_PKG);
-			$ssalc = new RegisteredClass($reg);
-
-			$this->_factory->addClassToRegistry($ssalc);
+			$this->_setupClass($class, self::PROBLEM_PKG);
 		}
 
 		$objs = $this->_factory->getObjectsByClassName(self::PROBLEM_PKG.'\\RequiresRootInterface');
-
 	}
 
 	/**
@@ -193,10 +200,7 @@ class ObjectFactoryTest extends \PHPUnit_Framework_TestCase {
 	 * @expectedException \Inverted\Core\ClassNotFoundException
 	 */
 	public function testNoClassesMatch() {
-		$reg   = new Registration('RequiresRootInterface', self::PROBLEM_PKG);
-		$ssalc = new RegisteredClass($reg);
-
-		$this->_factory->addClassToRegistry($ssalc);
+		$this->_setupClass('RequiresRootInterface', self::PROBLEM_PKG);
 
 		$objs = $this->_factory->getObjectsByClassName(self::PROBLEM_PKG.'\\RequiresRootInterface');
 	}
@@ -206,16 +210,13 @@ class ObjectFactoryTest extends \PHPUnit_Framework_TestCase {
 	 * @expectedException \Inverted\Core\NoTypeDeclarationException
 	 */
 	public function testBareParameter() {
-		$reg   = new Registration('HasNoStronglyTypedParameter', self::PROBLEM_PKG);
-		$ssalc = new RegisteredClass($reg);
-
-		$this->_factory->addClassToRegistry($ssalc);
+		$this->_setupClass('HasNoStronglyTypedParameter', self::PROBLEM_PKG);
 
 		$objs = $this->_factory->getObjectsByClassName(self::PROBLEM_PKG.'\\HasNoStronglyTypedParameter');
 	}
 
-	private function _setupSecondClass() {
-		$reg   = new Registration('SecondClass', self::SIMPLE_PKG, [Registration::IDENTIFIER => 'second']);
+	private function _setupClass($class, $namespace, $options=[]) {
+		$reg   = new Registration($class, $namespace, $options);
 		$ssalc = new RegisteredClass($reg);
 
 		$this->_factory->addClassToRegistry($ssalc);

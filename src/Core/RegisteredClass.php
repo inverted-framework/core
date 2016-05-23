@@ -44,6 +44,10 @@ class RegisteredClass {
 		return $method;
 	}
 
+	public function getParameters() {
+		return $this->_config->getParameters();
+	}
+
 	/**
 	 *
 	 */

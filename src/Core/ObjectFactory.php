@@ -20,6 +20,8 @@ class ObjectFactory extends ClassRegistry {
 
 		$this->_cache = [];
 		$this->_stack = [];
+
+		$this->_use_variadic = false;
 	}
 
 	/**
@@ -98,24 +100,11 @@ class ObjectFactory extends ClassRegistry {
 			$ssalc = $this->registry[$position];
 
 			// TODO: Check if class has configured parameters and use those instead.
-			$params = $this->_get_parameters($ssalc->getConstructor());
-			$args = [];
-			foreach ($params as $param) {
-				if ($param->getClass()) {
-					$results = $this->_search($param->getClass()->getName(), $param->getName());
-
-					if (count($results) == 1) {
-						$args[] = $this->_resolve($results[0])->getInstance();
-					} else {
-						if (count($results) == 0) {
-							throw new ClassNotFoundException();
-						} else {
-							throw new TooManyClassesException();
-						}
-					}
-				} else {
-					throw new NoTypeDeclarationException();
-				}
+			$parameters = $ssalc->getParameters();
+			if (empty($parameters)) {
+				$args = $this->_resolve_method_parameters($this->_get_parameters($ssalc->getConstructor()));
+			} else {
+				$args = $this->_resolve_configured_parameters($parameters);
 			}
 
 			$object = $ssalc->Instantiate($args);
@@ -133,5 +122,44 @@ class ObjectFactory extends ClassRegistry {
 	// 
 	private function _get_parameters($method) {
 		return (!empty($method)) ? $method->getParameters() : [];
+	}
+
+	public function _resolve_method_parameters($params) {
+		$args = [];
+		foreach ($params as $param) {
+			if ($param->getClass()) {
+				$results = $this->_search($param->getClass()->getName(), $param->getName());
+
+				if (count($results) == 1) {
+					$args[] = $this->_resolve($results[0])->getInstance();
+				} else {
+					if (count($results) == 0) {
+						throw new ClassNotFoundException();
+					} else {
+						throw new TooManyClassesException();
+					}
+				}
+			} else {
+				throw new NoTypeDeclarationException();
+			}
+		}
+		return $args;
+	}
+
+	public function _resolve_configured_parameters($params) {
+		$args = [];
+		foreach ($params as $param) {
+			if (is_string($param) && StringUtil::startsWith($param, '&')) {
+				$objs = $this->getObjectsByIdentifier(substr($param, 1));
+				if (!empty($objs)) {
+					$args[] = $objs[0];
+				} else {
+					throw new IdentifierNotFoundException();
+				}
+			} else {
+				$args[] = $param;
+			}
+		}
+		return $args;
 	}
 }
