@@ -14,8 +14,20 @@ class Configuration {
 	 */
 	private $_namespace;
 
+	/**
+	 * @var bool
+	 */
+	private $_use_autoload;
+
+	/**
+	 * @var Registrations[]
+	 */
+	private $_registrations;
+
 	public function __construct() {
-		$this->_namespace = '';
+		$this->_namespace     = '';
+		$this->_use_autoload  = true;
+		$this->_registrations = [];
 	}
 
 	/**
@@ -30,6 +42,41 @@ class Configuration {
 	 */
 	public function getNamespace() {
 		return $this->_namespace;
+	}
+
+	/**
+	 *
+	 */
+	public function setUseAutoload($use_autoload) {
+		$this->_use_autoload = $use_autoload;
+	}
+
+	/**
+	 *
+	 */
+	public function getUseAutoload() {
+		return $this->_use_autoload;
+	}
+
+	/**
+	 *
+	 */
+	public function addRegistration($registration) {
+		$this->_registrations[] = $registration;
+	}
+
+	/**
+	 *
+	 */
+	public function setRegistrations($registrations) {
+		$this->_registrations = $registrations;
+	}
+
+	/**
+	 *
+	 */
+	public function getRegistrations() {
+		return $this->_registrations;
 	}
 }
 
