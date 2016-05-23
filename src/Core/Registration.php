@@ -5,6 +5,7 @@ namespace Inverted\Core;
  * 
  */
 class Registration {
+	const CLASS_NAME  = 'class_name';
 	const IDENTIFIER  = 'name';
 	const CONSTRUCTOR = 'constructor';
 	const PARAMETERS  = 'parameters';

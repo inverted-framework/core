@@ -5,9 +5,9 @@ namespace Inverted\Core;
  *
  */
 class Configuration {
-	const NAMESPACE     = 'namespace';
-	const INCLUDE_DECL  = 'include';
-	const REGISTRATIONS = 'classes';
+	const KEYWORD_NAMESPACE = 'namespace';
+	const KEYWORD_INCLUDE   = 'include';
+	const KEYWORD_CLASSES   = 'classes';
 
 	/**
 	 * @var string
@@ -28,6 +28,22 @@ class Configuration {
 		$this->_namespace     = '';
 		$this->_use_autoload  = true;
 		$this->_registrations = [];
+	}
+
+	/**
+	 *
+	 */
+	public function addConfiguration(Configuration $config, $overwrite_registrations=false) {
+		// $this->setNamespace($config->getNamespace());
+		$this->setUseAutoload($config->getUseAutoload());
+
+		if ($overwrite_registrations) {
+			$this->setRegistrations($config->getRegistrations());
+		} else {
+			foreach ($config->getRegistrations() as $registration) {
+				$this->addRegistration($registration);
+			}
+		}
 	}
 
 	/**
