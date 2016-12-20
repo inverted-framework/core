@@ -6,7 +6,7 @@ use \Inverted\Core\ExecutionContext;
 /**
  * 
  */
-class ExecutionContextTest extends \PHPUnit_Framework_TestCase {
+class JSONExecutionContextTest extends \PHPUnit_Framework_TestCase {
 	/**
 	 * @test
 	 */

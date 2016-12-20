@@ -39,5 +39,20 @@ class ConfigurationTest extends \PHPUnit_Framework_TestCase {
 
 		$this->assertEquals($regs, $config->getRegistrations());
 	}
+
+	/**
+	 * @test
+	 */
+	public function testAddConfiguration() {
+		$cnf = new Configuration();
+		$reg = [];
+
+		$ns   = '\\Any\\Namespace\\Will\\Do';
+		$bool = false;
+
+		$regs[] = new Registration('X', $ns);
+		$regs[] = new Registration('Y', $ns);
+		$reg    = new Registration('Z', '\\Another\\Namespace');
+	}
 }
 
