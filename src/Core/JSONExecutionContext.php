@@ -33,7 +33,6 @@ class JSONExecutionContext extends ObjectFactory {
 			throw new MissingConfigurationFileException();
 		}
 
-		// TODO: Support comments.
 		$config = $this->_json_clean_decode(file_get_contents($configuration_file));
 		if (empty($config)) {
 			throw new InvalidConfigurationFileException();

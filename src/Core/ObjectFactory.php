@@ -15,20 +15,37 @@ class ObjectFactory extends ClassRegistry {
 	 */
 	private $_stack;
 
-	public function __construct() {
+	/**
+	 * @var boolean
+	 */
+	protected $_use_variadic;
+
+	/**
+	 * @var boolean
+	 */
+	protected $_attempt_autoload;
+
+	public function __construct($attempt_autoload=true) {
 		parent::__construct();
 
 		$this->_cache = [];
 		$this->_stack = [];
 
-		$this->_use_variadic = false;
+		$this->_use_variadic     = false;
+		$this->_attempt_autoload = $attempt_autoload;
 	}
 
 	/**
 	 *
 	 */
 	public function getObjectsByClassName($class_name) {
-		return $this->_get_objects($class_name, self::BY_CLASS_NAME);
+		$objects = $this->_get_objects($class_name, self::BY_CLASS_NAME);
+		if (count($objects) == 0) {
+			if ($this->_autoload_class($class_name)) {
+				$objects = $this->_get_objects($class_name, self::BY_CLASS_NAME);
+			}
+		}
+		return $objects;
 	}
 
 	//
@@ -124,7 +141,7 @@ class ObjectFactory extends ClassRegistry {
 		return (!empty($method)) ? $method->getParameters() : [];
 	}
 
-	public function _resolve_method_parameters($params) {
+	private function _resolve_method_parameters($params) {
 		$args = [];
 		foreach ($params as $param) {
 			if ($param->getClass()) {
@@ -146,7 +163,7 @@ class ObjectFactory extends ClassRegistry {
 		return $args;
 	}
 
-	public function _resolve_configured_parameters($params) {
+	private function _resolve_configured_parameters($params) {
 		$args = [];
 		foreach ($params as $param) {
 			if (is_string($param) && StringUtil::startsWith($param, '&')) {
@@ -161,5 +178,14 @@ class ObjectFactory extends ClassRegistry {
 			}
 		}
 		return $args;
+	}
+
+	// class_exists will force PHP to attempt to autoload the class in question.
+	private function _autoload_class($class_name) {
+		if ($this->_attempt_autoload && class_exists($class_name)) {
+			$this->addClassToRegistry(new RegisteredClass(new Registration($class_name)));
+			return true;
+		}
+		return false;
 	}
 }

@@ -221,5 +221,16 @@ class ObjectFactoryTest extends \PHPUnit_Framework_TestCase {
 
 		$this->_factory->addClassToRegistry($ssalc);
 	}
+
+	/**
+	 * @test
+	 */
+	public function testAutoloading() {
+		// Rip of testGetObjectsByClassName without registering the class.
+		$obj = $this->_factory->getObjectsByClassName(ltrim(self::SIMPLE_PKG.'\\SecondClass', '\\'));
+
+		$this->assertCount(1, $obj);
+		$this->assertInstanceOf(self::SIMPLE_PKG.'\\SecondClass', $obj[0]);
+	}
 }
 
