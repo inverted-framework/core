@@ -98,7 +98,7 @@ class ObjectFactory extends ClassRegistry {
 				break;
 			}
 		}
-		
+
 		if (!empty($identifiers)) {
 			return array_intersect($identifiers, $types);
 		} else {
@@ -116,7 +116,6 @@ class ObjectFactory extends ClassRegistry {
 		if (!isset($this->_cache[$position]) || empty($this->_cache[$position])) {
 			$ssalc = $this->registry[$position];
 
-			// TODO: Check if class has configured parameters and use those instead.
 			$parameters = $ssalc->getParameters();
 			if (empty($parameters)) {
 				$args = $this->_resolve_method_parameters($this->_get_parameters($ssalc->getConstructor()));
@@ -136,7 +135,7 @@ class ObjectFactory extends ClassRegistry {
 		return $object;
 	}
 
-	// 
+	//
 	private function _get_parameters($method) {
 		return (!empty($method)) ? $method->getParameters() : [];
 	}
@@ -147,14 +146,21 @@ class ObjectFactory extends ClassRegistry {
 			if ($param->getClass()) {
 				$results = $this->_search($param->getClass()->getName(), $param->getName());
 
-				if (count($results) == 1) {
-					$args[] = $this->_resolve($results[0])->getInstance();
-				} else {
-					if (count($results) == 0) {
-						throw new ClassNotFoundException();
-					} else {
+				switch (count($results)) {
+					case 0:
+						if ($this->_autoload_class($param->getClass()->getName())) {
+							$results = $this->_search($param->getClass()->getName(), $param->getName());
+						}
+						// At this point, it is not possible to have count($results) > 0.
+						if (count($results) != 1) {
+							throw new ClassNotFoundException();
+							break;
+						}
+					case 1:
+						$args[] = $this->_resolve($results[0])->getInstance();
+						break;
+					default:
 						throw new TooManyClassesException();
-					}
 				}
 			} else {
 				throw new NoTypeDeclarationException();

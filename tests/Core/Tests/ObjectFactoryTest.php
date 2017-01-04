@@ -6,7 +6,7 @@ use \Inverted\Core\RegisteredClass;
 use \Inverted\Core\Registration;
 
 /**
- * 
+ *
  */
 class ObjectFactoryTest extends \PHPUnit_Framework_TestCase {
 	const SIMPLE_PKG  = '\\Inverted\\Core\\Tests\\Projects\\Simple';
@@ -34,7 +34,7 @@ class ObjectFactoryTest extends \PHPUnit_Framework_TestCase {
 		$obj = $this->_factory->getObjectsByClassName(ltrim(self::SIMPLE_PKG.'\\SecondClass', '\\'));
 
 		$this->assertCount(1, $obj);
-		$this->assertInstanceOf(self::SIMPLE_PKG.'\\SecondClass', $obj[0]);		
+		$this->assertInstanceOf(self::SIMPLE_PKG.'\\SecondClass', $obj[0]);
 	}
 
 	/**
@@ -226,11 +226,14 @@ class ObjectFactoryTest extends \PHPUnit_Framework_TestCase {
 	 * @test
 	 */
 	public function testAutoloading() {
-		// Rip of testGetObjectsByClassName without registering the class.
-		$obj = $this->_factory->getObjectsByClassName(ltrim(self::SIMPLE_PKG.'\\SecondClass', '\\'));
+		$obj = $this->_factory->getObjectsByClassName(ltrim(self::SIMPLE_PKG.'\\FifthClass', '\\'));
 
 		$this->assertCount(1, $obj);
-		$this->assertInstanceOf(self::SIMPLE_PKG.'\\SecondClass', $obj[0]);
+		$this->assertInstanceOf(self::SIMPLE_PKG.'\\FifthClass', $obj[0]);
+
+		$third = $this->_factory->getObjectsByClassName(ltrim(self::SIMPLE_PKG.'\\ThirdClass', '\\'));
+		$this->assertCount(1, $third);
+		$this->assertInstanceOf(self::SIMPLE_PKG.'\\ThirdClass', $third[0]);
+		$this->assertEquals($obj[0]->three->x, $third[0]->x);
 	}
 }
-
