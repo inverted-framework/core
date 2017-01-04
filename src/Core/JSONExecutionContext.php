@@ -30,13 +30,13 @@ class JSONExecutionContext extends ObjectFactory {
 
 	private function _parse($configuration_file) {
 		if (!file_exists($configuration_file)) {
-			// TODO: Throw Exception.
+			throw new MissingConfigurationFileException();
 		}
 
 		// TODO: Support comments.
 		$config = $this->_json_clean_decode(file_get_contents($configuration_file));
 		if (empty($config)) {
-			// TODO: Also throw Exception.
+			throw new InvalidConfigurationFileException();
 		}
 
 		$configuration = new Configuration();
