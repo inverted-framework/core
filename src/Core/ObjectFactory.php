@@ -189,7 +189,9 @@ class ObjectFactory extends ClassRegistry {
 	// class_exists will force PHP to attempt to autoload the class in question.
 	private function _autoload_class($class_name) {
 		if ($this->_attempt_autoload && class_exists($class_name)) {
-			$this->addClassToRegistry(new RegisteredClass(new Registration($class_name)));
+			$reg   = new Registration($class_name);
+			$ssalc = new RegisteredClass($reg);
+			$this->addClassToRegistry($ssalc);
 			return true;
 		}
 		return false;
