@@ -1,0 +1,30 @@
+/ $this->_setupClass('SecondClass', self::SIMPLE_PKG, [Registration::IDENTIFIER => 'this']);
+// $this->_setupClass('ThirdClass', self::SIMPLE_PKG, [Registration::IDENTIFIER => 'that']);
+// $this->_setupClass('HasStaticConstructor', self::SIMPLE_PKG, [Registration::CONSTRUCTOR => 'getInstance']);
+// $this->_setupClass('HasParameters', self::SIMPLE_PKG);
+// $this->_setupClass('HasMultipleParameters', self::SIMPLE_PKG, [Registration::PARAMETERS => ['&this', '&that', 'string', 1, ['x', 'y', 'z']]]);
+{
+	"namespace": "\\Inverted\\Core\\Tests\\Projects\\Simple",
+	"classes": [
+		{
+			  "class_name": "SecondClass"
+			, "name": "this"
+		}
+		,{
+			  "class_name": "ThirdClass"
+			, "name": "that"
+		}
+		,{
+				  "class_name": "HasStaticConstructor"
+				, "constructor": "getInstance"
+		}
+		,{
+				  "class_name": "HasMultipleParameters"
+				, "parameters": ["&this", "&that", "string", 1, ["x", "y", "z"]]
+		}
+		,{
+			  "class_name": "\\Inverted\\Core\\Tests\\Projects\\Problems\\HasNoStronglyTypedParameter"
+			, "parameters": [1]
+		}
+	]
+}

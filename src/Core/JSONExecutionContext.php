@@ -33,7 +33,7 @@ class JSONExecutionContext extends ObjectFactory {
 			throw new MissingConfigurationFileException();
 		}
 
-		$config = $this->_json_clean_decode(file_get_contents($configuration_file));
+		$config = $this->_json_clean_decode(file_get_contents($configuration_file), true);
 		if (empty($config)) {
 			throw new InvalidConfigurationFileException();
 		}
@@ -45,11 +45,11 @@ class JSONExecutionContext extends ObjectFactory {
 		}
 
 		if (isset($config[Configuration::KEYWORD_NAMESPACE])) {
-			$configuration->setNamespace($config[Configuration::KEYWORD_NAMESPACE])
+			$configuration->setNamespace($config[Configuration::KEYWORD_NAMESPACE]);
 		}
 
-		if (isset($config[Configuration::KEYWORD_REGISTRATIONS])) {
-			foreach ($config[Configuration::KEYWORD_REGISTRATIONS] as $registration) {
+		if (isset($config[Configuration::KEYWORD_CLASSES])) {
+			foreach ($config[Configuration::KEYWORD_CLASSES] as $registration) {
 				$name  = $this->_array_key_read_delete($registration, Registration::CLASS_NAME);
 				$reg   = new Registration($name, $configuration->getNamespace(), $registration);
 				$configuration->addRegistration($reg);
@@ -67,7 +67,7 @@ class JSONExecutionContext extends ObjectFactory {
 	private function _json_clean_decode($json, $assoc = false, $depth = 512, $options = 0) {
 	    // search and remove comments like /* */ and //
 	    $json = preg_replace("#(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)|([\s\t]//.*)|(^//.*)#", '', $json);
-	    
+
 	    // TODO: Use ExecutionContext for version sniffing?
 	    if(version_compare(phpversion(), '5.4.0', '>=')) {
 	        $json = json_decode($json, $assoc, $depth, $options);
@@ -82,4 +82,3 @@ class JSONExecutionContext extends ObjectFactory {
 	    return $json;
 	}
 }
-
