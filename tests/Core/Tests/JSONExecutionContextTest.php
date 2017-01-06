@@ -2,7 +2,6 @@
 namespace Inverted\Core\Tests;
 
 use \Inverted\Core\JSONExecutionContext;
-use \Inverted\Core\MissingConfigurationFileException;
 use \Inverted\Core\InvalidConfigurationFileException;
 
 /**
@@ -24,28 +23,25 @@ class JSONExecutionContextTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @test
+	 * @expectedException \Inverted\Core\MissingConfigurationFileException
 	 */
 	public function testMissingJSONConfiguration() {
-		$this->expectException(MissingConfigurationFileException::class);
-
 		new JSONExecutionContext('/path/to/any/config.json');
 	}
 
 	/**
 	 * @test
+	 * @expectedException \Inverted\Core\InvalidConfigurationFileException
 	 */
 	public function testJSONConfigurationWithBrokenComments() {
-		$this->expectException(InvalidConfigurationFileException::class);
-
 		new JSONExecutionContext(dirname(__FILE__).'/../../resources/Projects/broken1.json');
 	}
 
 	/**
 	 * @test
+	 * @expectedException \Inverted\Core\InvalidConfigurationFileException
 	 */
 	public function testJSONConfigurationWithBrokenJSON() {
-		$this->expectException(InvalidConfigurationFileException::class);
-
 		new JSONExecutionContext(dirname(__FILE__).'/../../resources/Projects/broken2.json');
 	}
 
