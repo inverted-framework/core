@@ -1,0 +1,10 @@
+{
+	  "namespace": "\\Inverted\\Core\\Tests\\Projects\\Problems"
+	, "include": "simple.json"
+	, "classes": [
+		{
+				"class_name": "FirstImplementation"
+			, "name": "first"
+		}
+	]
+}

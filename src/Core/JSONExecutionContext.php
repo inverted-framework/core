@@ -23,7 +23,7 @@ namespace Inverted\Core;
  *		]
  *	}
  */
-class JSONExecutionContext extends ObjectFactory {
+class JSONExecutionContext extends ExecutionContext {
 	public function __construct($configuration_file) {
 		parent::__construct($this->_parse($configuration_file));
 	}
@@ -41,7 +41,8 @@ class JSONExecutionContext extends ObjectFactory {
 		$configuration = new Configuration();
 		if (isset($config[Configuration::KEYWORD_INCLUDE])) {
 			// TODO: Make whether we want to inherit a namespace configurable.
-			$configuration->addConfiguration($this->_parse($config[Configuration::KEYWORD_INCLUDE]));
+			$parent_dir = dirname($configuration_file);
+			$configuration->addConfiguration($this->_parse($parent_dir.'/'.$config[Configuration::KEYWORD_INCLUDE]));
 		}
 
 		if (isset($config[Configuration::KEYWORD_NAMESPACE])) {
@@ -55,6 +56,8 @@ class JSONExecutionContext extends ObjectFactory {
 				$configuration->addRegistration($reg);
 			}
 		}
+
+		return $configuration;
 	}
 
 	private function _array_key_read_delete(&$array, $key) {

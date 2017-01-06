@@ -6,7 +6,7 @@ use \Inverted\Core\ExecutionContext;
 use \Inverted\Core\Registration;
 
 /**
- * 
+ *
  */
 class ExecutionContextTest extends \PHPUnit_Framework_TestCase {
 	/**
@@ -15,19 +15,24 @@ class ExecutionContextTest extends \PHPUnit_Framework_TestCase {
 	private $_config;
 
 	/**
+	 * @var string
+	 */
+	private $_ns;
+
+	/**
 	 * @before
 	 */
 	public function setUp() {
-		$classes = ['First', 'Second', 'Fourth'];
-		$hases   = ['MultipleParameters', 'Parameters', 'StaticConstructor'];
-		$ns      = '\\Inverted\\Core\\Tests\\Projects\\Simple';
+		$this->_ns = '\\Inverted\\Core\\Tests\\Projects\\Simple';
+		$classes   = ['First', 'Second', 'Fourth'];
+		$hases     = ['MultipleParameters', 'Parameters', 'StaticConstructor'];
 
 		$config  = new Configuration();
-		$config->setNamespace($ns);
+		$config->setNamespace($this->_ns);
 		$config->setUseAutoload(true);
 
 		foreach ($classes as $class) {
-			$config->addRegistration(new Registration($class.'Class', $ns));
+			$config->addRegistration(new Registration($class.'Class', $this->_ns));
 		}
 
 		foreach ($hases as $class) {
@@ -52,6 +57,19 @@ class ExecutionContextTest extends \PHPUnit_Framework_TestCase {
 		$classes = $ctx->getObjectsByClassName('\\Inverted\\Core\\Tests\\Projects\\Simple\\ThirdClass');
 		$this->assertEquals(1, count($classes));
 	}
+
+	/**
+	 * @test
+	 */
+	public function textClassFromExternalPackage() {
+		$class_name = '\\Inverted\\Core\\Tests\\Projects\\Problems\\HasNoStronglyTypedParameter';
+		$this->_config->addRegistration(new Registration($class_name, $this->_ns, [Registration::PARAMETERS => [3]]));
+
+		$ctx = new ExecutionContext($this->_config);
+
+		$classes = $ctx->getObjectsByClassName($class_name);
+
+		$this->assertCount(1, $classes);
+		$this->assertInstanceOf($class_name, $classes[0]);
+	}
 }
-
-
